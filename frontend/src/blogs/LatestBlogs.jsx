@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { SlashIcon, ChevronLeft, ChevronRight } from "lucide-react";
@@ -913,12 +913,12 @@ const BlogCardItem = ({ color, title, description, slug, date }) => {
                 color: color,
               }}
               onMouseEnter={(e) => {
-                e.target.style.backgroundColor = color;
-                e.target.style.color = "white";
+                e.currentTarget.style.backgroundColor = color;
+                e.currentTarget.style.color = "white";
               }}
               onMouseLeave={(e) => {
-                e.target.style.backgroundColor = "transparent";
-                e.target.style.color = color;
+                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.color = color;
               }}
             >
               Read More
@@ -930,16 +930,7 @@ const BlogCardItem = ({ color, title, description, slug, date }) => {
   );
 };
 
-const LatestBlogsCard = ({ searchQuery, currentPage, itemsPerPage }) => {
-
-  const filteredBlogs = blogs.filter((blog) => {
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      blog.title.toLowerCase().includes(searchLower) ||
-      blog.description.toLowerCase().includes(searchLower)
-    );
-  });
-
+const LatestBlogsCard = ({ filteredBlogs, currentPage, itemsPerPage }) => {
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredBlogs.slice(indexOfFirstItem, indexOfLastItem);
@@ -949,7 +940,7 @@ const LatestBlogsCard = ({ searchQuery, currentPage, itemsPerPage }) => {
       {currentItems.length > 0 ? (
         currentItems.map((blog) => (
           <BlogCardItem
-            key={blog.id}
+            key={blog.slug}
             color={blog.color}
             title={blog.title}
             description={blog.description}
@@ -981,18 +972,8 @@ const LatestBlogsPagination = ({
   currentPage,
   setCurrentPage,
   itemsPerPage,
-  searchQuery,
+  filteredBlogs,
 }) => {
-
-  const filteredBlogs = blogs.filter((blog) => {
-    if (!searchQuery) return true;
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      blog.title.toLowerCase().includes(searchLower) ||
-      blog.description.toLowerCase().includes(searchLower)
-    );
-  });
-
   const totalPages = Math.ceil(filteredBlogs.length / itemsPerPage);
 
   const handlePageChange = (pageNumber) => {
@@ -1107,18 +1088,8 @@ const LatestBlogsPaginationWrapper = ({
   currentPage,
   setCurrentPage,
   itemsPerPage,
-  searchQuery,
+  filteredBlogs,
 }) => {
-
-  const filteredBlogs = blogs.filter((blog) => {
-    if (!searchQuery) return true;
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      blog.title.toLowerCase().includes(searchLower) ||
-      blog.description.toLowerCase().includes(searchLower)
-    );
-  });
-
   const totalPages = Math.ceil(filteredBlogs.length / itemsPerPage);
   const showPagination = totalPages > 1;
 
@@ -1134,7 +1105,7 @@ const LatestBlogsPaginationWrapper = ({
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         itemsPerPage={itemsPerPage}
-        searchQuery={searchQuery}
+        filteredBlogs={filteredBlogs}
       />
     </div>
   );
@@ -1145,6 +1116,18 @@ const LatestBlogsMainContent = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
+
+  const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+  const filteredBlogs = useMemo(() => {
+    if (!normalizedSearchQuery) return blogs;
+
+    return blogs.filter((blog) => {
+      return (
+        blog.title.toLowerCase().includes(normalizedSearchQuery) ||
+        blog.description.toLowerCase().includes(normalizedSearchQuery)
+      );
+    });
+  }, [normalizedSearchQuery]);
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -1167,7 +1150,7 @@ const LatestBlogsMainContent = () => {
           handleSearch={handleSearch}
         />
         <LatestBlogsCard
-          searchQuery={searchQuery}
+          filteredBlogs={filteredBlogs}
           currentPage={currentPage}
           itemsPerPage={itemsPerPage}
         />
@@ -1176,7 +1159,7 @@ const LatestBlogsMainContent = () => {
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         itemsPerPage={itemsPerPage}
-        searchQuery={searchQuery}
+        filteredBlogs={filteredBlogs}
       />
     </div>
   );
