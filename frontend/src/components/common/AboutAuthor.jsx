@@ -2,7 +2,7 @@ import { Mail } from "lucide-react";
 
 const AboutAuthor = () => {
   return (
-    <section className="">
+    <section>
       <div className="relative overflow-hidden bg-gradient-to-br from-[#F9F7F2] via-white to-[#F9F7F2] border border-gray-200 rounded-xl p-6 md:p-8 shadow-sm hover:shadow-md transition-all duration-300 group">
         {/* Decorative background elements */}
         <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-[#1A8781]/5 to-transparent rounded-full -translate-y-4 translate-x-4"></div>
